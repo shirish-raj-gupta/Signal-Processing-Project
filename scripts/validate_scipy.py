@@ -104,6 +104,15 @@ def tex_num(v: float, digits: int) -> str:
     return f"{v:.{digits}f}".replace("-", "$-$")
 
 
+def tex_sci(v: float) -> str:
+    """5.7e-05 -> $5.7\\times10^{-5}$, 1e-03 -> $10^{-3}$."""
+    if v == 0:
+        return "0"
+    mantissa, exponent = f"{v:.1e}".split("e")
+    power = f"10^{{{int(exponent)}}}"
+    return f"${power}$" if mantissa == "1.0" else f"${mantissa}\\times{power}$"
+
+
 def tex_label(win: dict, beta: float) -> str:
     return f"Kaiser ($\\beta = {beta:g}$)" if win["id"] == "kaiser" else win["label"].replace("\u2013", "--")
 
@@ -125,10 +134,7 @@ def write_tables(app: dict, worst: dict) -> None:
         encoding="utf-8",
     )
 
-    val_rows = [
-        f"{METRIC_NAME[k]} & {TOLERANCE[k]:.0e} & {worst[k]:.1e} \\\\".replace("e-0", "e-").replace("e+00", "")
-        for k in TOLERANCE
-    ]
+    val_rows = [f"{METRIC_NAME[k]} & {tex_sci(TOLERANCE[k])} & {tex_sci(worst[k])} \\\\" for k in TOLERANCE]
     (TABLES / "validation.tex").write_text(
         "\\begin{tabular}{lrr}\n\\hline\n"
         "Metric & Tolerance & Largest $|\\text{app} - \\text{SciPy}|$ \\\\\n\\hline\n"

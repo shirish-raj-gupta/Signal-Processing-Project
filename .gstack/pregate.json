@@ -5,6 +5,8 @@
     "index.html": ["src/main.test.ts"],
     "src/main.ts": ["src/main.test.ts"],
     "src/plots.ts": ["src/main.test.ts"],
-    "src/style.css": []
+    "src/style.css": [],
+    "package.json": ["src/dsp/dsp.test.ts", "src/main.test.ts"],
+    "package-lock.json": ["src/dsp/dsp.test.ts", "src/main.test.ts"]
   }
 }

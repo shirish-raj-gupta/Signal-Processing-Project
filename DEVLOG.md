@@ -64,3 +64,17 @@ Running log of design decisions, problems met and how they were fixed. Source fo
 - The same script lists the published Harris (1978) Table I values next to ours. Beyond the
   Blackman/Blackman–Harris widths found earlier, Table I's Hamming scalloping loss (1.78 dB vs
   1.75 dB) and Hann side-lobe level (−32 dB vs −31.5 dB, more than rounding) also differ.
+
+## 2026-11-26 — Demo video
+
+- **Capture.** `scripts/record_demo.py` drives the real app with a visible cursor. Frames come from
+  Chrome's screencast at 1.5x scale, so text stays sharp at 1920x1080. Captions are white on a black
+  band under the app, so they never cover it. A rehearsal run first checks every number a caption
+  quotes against what the app shows.
+- **Problem: the video ran about 17 % long.** A 28.8 s capture became a 33.6 s video, which would
+  have pushed every caption out of sync. Timing frames by arrival instead of Chrome's frame
+  timestamps made no difference. The cause was ffmpeg's concat demuxer: it gives each still image a
+  1/25 s time base, so frames arriving less than 40 ms apart were pushed later.
+  **Fix:** the script now writes a constant 30 frame/s stream itself (for every 1/30 s tick it sends
+  the latest captured frame to ffmpeg), and the captions use the same clock. The video length now
+  matches the capture exactly.

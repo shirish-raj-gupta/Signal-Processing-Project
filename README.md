@@ -28,12 +28,13 @@ npm test           # unit + DOM tests
 npm run build      # type-check and production build
 ```
 
-## Validation and report data
+## Validation, report data and demo video
 
 ```bash
 npm run metrics                       # engine metrics -> report/data/app_metrics.json
 python scripts/validate_scipy.py      # SciPy cross-check, report tables and trade-off figure
 python scripts/screenshots.py         # report screenshots (needs `npx vite preview --port 4173`)
+python scripts/record_demo.py         # silent captioned demo video (same server; --rehearse first)
 ```
 
 The mid-term report source is in [`report/`](report) (build with

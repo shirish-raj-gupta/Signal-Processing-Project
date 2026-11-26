@@ -1,0 +1,22 @@
+{
+  "name": "sp09-window-leakage-analyzer",
+  "private": true,
+  "version": "0.5.0",
+  "description": "SP09 - interactive analyzer for windowing effects and spectral leakage (EE4999 Signal Processing Project)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "metrics": "node --experimental-strip-types scripts/export-metrics.ts"
+  },
+  "dependencies": {
+    "uplot": "^1.6.32"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vite": "^7.3.8",
+    "vitest": "^3.2.7"
+  }
+}

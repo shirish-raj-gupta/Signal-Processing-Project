@@ -1,0 +1,18 @@
+node_modules/
+dist/
+
+# Submission files and personal details stay local (roll number is private)
+deliverables/
+report/author.tex
+
+# LaTeX build output
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.pdf
+
+# Screen recordings
+*.webm
+
+__pycache__/

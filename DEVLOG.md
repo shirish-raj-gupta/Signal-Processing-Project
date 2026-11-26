@@ -49,3 +49,18 @@ Running log of design decisions, problems met and how they were fixed. Source fo
   `[hidden] { display: none !important }` rule.
 - **Phone layout.** At 390 px the 2 px traces of a 32-lobe spectrum merged into a solid comb.
   Traces are 1.25 px on narrow screens, and plots come before the controls.
+- **Test environment quirk.** happy-dom 21 ignores `<option selected>` in some `<select>`s
+  (16/32/[64] reports 32), which made the DOM test compare at the wrong N. The test now applies
+  the `selected` option explicitly; the app itself was correct in Chromium.
+
+## 2026-11-26 — Cross-check against SciPy
+
+- `npm run metrics` exports the engine's figures of merit (7 windows plus a Kaiser β sweep,
+  N = 256). `scripts/validate_scipy.py` recomputes every metric with SciPy windows and a
+  brute-force 2²¹-point FFT (a different algorithm from the app's DTFT refinement).
+  **Result:** largest differences are 1.1e-8 bins (−3/−6 dB widths), 1.8e-7 dB (peak side lobe),
+  5.7e-5 bins (Kaiser null, limited by the reference grid) and ~1e-14 for the closed-form
+  quantities — all within tolerance.
+- The same script lists the published Harris (1978) Table I values next to ours. Beyond the
+  Blackman/Blackman–Harris widths found earlier, Table I's Hamming scalloping loss (1.78 dB vs
+  1.75 dB) and Hann side-lobe level (−32 dB vs −31.5 dB, more than rounding) also differ.

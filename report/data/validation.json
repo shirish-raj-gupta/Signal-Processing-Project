@@ -1,0 +1,25 @@
+{
+  "N": 256,
+  "windows": 7,
+  "tolerance": {
+    "nullToNull": 0.001,
+    "bw3": 0.001,
+    "bw6": 0.001,
+    "psl": 0.01,
+    "coherentGain": 1e-09,
+    "enbw": 1e-09,
+    "scallopLoss": 1e-06,
+    "wcpl": 1e-06
+  },
+  "maxAbsDiff": {
+    "nullToNull": 5.715306172238144e-05,
+    "bw3": 4.694231670043791e-09,
+    "bw6": 1.1218174167382244e-08,
+    "psl": 1.808637790645662e-07,
+    "coherentGain": 5.551115123125783e-16,
+    "enbw": 2.6645352591003757e-15,
+    "scallopLoss": 1.3766765505351941e-14,
+    "wcpl": 8.881784197001252e-15
+  },
+  "pass": true
+}

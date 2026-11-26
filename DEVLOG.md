@@ -32,3 +32,20 @@ Running log of design decisions, problems met and how they were fixed. Source fo
   definition (D = N − 1) used in FIR design gives slightly different numbers at small N
   (e.g. Hann ENBW = 1.5·N/(N−1) = 1.524 at N = 64 instead of 1.500). Periodic is the default;
   the comparison view has a toggle for the symmetric form.
+
+## 2026-11-26 — Web UI (Leakage Explorer, Window Comparison)
+
+- **Problem: plots froze while a slider moved.** Dragging the tone from 10.00 to 10.50 bins
+  updated the read-out tiles, but the spectrum still showed the on-bin picture. The plots were
+  updated with uPlot's `setData(data, false)` (to keep the user's zoom), and that call skips
+  uPlot's own redraw. **Fix:** call `redraw()` after `setData(…, false)`. Checked by screenshot
+  at 10.5 bins and with a Kaiser β sweep in the comparison view.
+- **Problem: on-bin DFT samples were invisible.** For an on-bin tone the N-point DFT samples
+  land exactly on the window's nulls (−∞ dB), below the plot. **Fix:** DFT dots below the plot
+  floor are pinned to −140 dB and the legend reads "≤ −140 dB", so the "single spectral line"
+  of an on-bin tone can be seen.
+- **Problem: hidden controls reappeared.** The Kaiser β slider showed for every window because
+  the `.field { display: grid }` rule overrode the HTML `hidden` attribute. **Fix:** a global
+  `[hidden] { display: none !important }` rule.
+- **Phone layout.** At 390 px the 2 px traces of a 32-lobe spectrum merged into a solid comb.
+  Traces are 1.25 px on narrow screens, and plots come before the controls.

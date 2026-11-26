@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Compare window functions on finite sinusoids and measure main-lobe width and side-lobe levels." />
+    <meta name="theme-color" content="#0f1b2d" />
+    <title>Window &amp; Leakage Analyzer · SP09</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231d3557'/%3E%3Cpath d='M3 25h3c4 0 5-18 10-18s6 18 10 18h3' fill='none' stroke='%2386b6ef' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"
+    />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 32 32" aria-hidden="true">
+          <rect width="32" height="32" rx="8" fill="#1d3557" />
+          <path d="M3 25h3c4 0 5-18 10-18s6 18 10 18h3" fill="none" stroke="#86b6ef" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <div>
+          <h1>Window &amp; Leakage Analyzer</h1>
+          <p class="tagline">SP09 · windowing effects and spectral leakage on finite sinusoids</p>
+        </div>
+      </div>
+      <nav class="tabs" role="tablist" aria-label="Views">
+        <button type="button" class="tab" role="tab" id="tab-leak" aria-controls="view-leak" aria-selected="true">Leakage Explorer</button>
+        <button type="button" class="tab" role="tab" id="tab-cmp" aria-controls="view-cmp" aria-selected="false" tabindex="-1">Window Comparison</button>
+      </nav>
+      <span class="build" title="Mid-term build: more windows, export and mobile packaging are planned">v0.5 · mid-term build</span>
+    </header>
+
+    <main>
+      <section class="view" id="view-leak" role="tabpanel" aria-labelledby="tab-leak">
+        <form class="controls" id="leak-form" autocomplete="off">
+          <fieldset>
+            <legend>Signal</legend>
+            <label class="field">
+              <span>Record length N</span>
+              <select id="l-n">
+                <option>32</option>
+                <option selected>64</option>
+                <option>128</option>
+                <option>256</option>
+                <option>512</option>
+                <option>1024</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Sample rate f<sub>s</sub> (Hz)</span>
+              <input id="l-fs" type="number" min="1" step="any" value="1000" inputmode="decimal" />
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Tone 1</legend>
+            <label class="field">
+              <span class="field-row">Frequency <output id="l-f1-out" for="l-f1"></output></span>
+              <input id="l-f1" type="range" min="1" max="31" step="0.01" value="10" />
+            </label>
+            <label class="field">
+              <span>Level (dB)</span>
+              <input id="l-a1" type="number" min="-120" max="20" step="1" value="0" />
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend><label class="check"><input id="l-t2" type="checkbox" /> Tone 2</label></legend>
+            <div class="pair">
+              <label class="field">
+                <span>Frequency (bins)</span>
+                <input id="l-f2" type="number" min="0" step="0.25" value="16" disabled />
+              </label>
+              <label class="field">
+                <span>Level (dB)</span>
+                <input id="l-a2" type="number" min="-120" max="20" step="5" value="-60" disabled />
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Analysis</legend>
+            <label class="field">
+              <span>Window</span>
+              <select id="l-win"></select>
+            </label>
+            <label class="field" id="l-beta-row" hidden>
+              <span class="field-row">Kaiser β <output id="l-beta-out" for="l-beta"></output></span>
+              <input id="l-beta" type="range" min="0" max="14" step="0.1" value="8.6" />
+            </label>
+            <label class="field">
+              <span>Zero-padding</span>
+              <select id="l-pad">
+                <option value="1">None (×1)</option>
+                <option value="2">×2</option>
+                <option value="4">×4</option>
+                <option value="8" selected>×8</option>
+                <option value="16">×16</option>
+              </select>
+            </label>
+            <label class="check"><input id="l-ref" type="checkbox" checked /> Overlay rectangular window</label>
+          </fieldset>
+        </form>
+
+        <div class="stage">
+          <div class="tiles" id="l-tiles" aria-live="polite"></div>
+          <article class="card">
+            <header class="card-head">
+              <h2>Magnitude spectrum</h2>
+              <p>Line: DTFT of the windowed record (zero-padded) · dots: the N-point DFT bins · dB re 1</p>
+            </header>
+            <div class="plot" id="p-spec"></div>
+          </article>
+          <article class="card">
+            <header class="card-head">
+              <h2>Time domain</h2>
+              <p>Record x[n], window envelope A·w[n] and windowed record x[n]·w[n]</p>
+            </header>
+            <div class="plot" id="p-time"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="view-cmp" role="tabpanel" aria-labelledby="tab-cmp" hidden>
+        <form class="controls" id="cmp-form" autocomplete="off">
+          <fieldset>
+            <legend>Windows</legend>
+            <div class="win-list" id="c-wins"></div>
+            <label class="field" id="c-beta-row">
+              <span class="field-row">Kaiser β <output id="c-beta-out" for="c-beta"></output></span>
+              <input id="c-beta" type="range" min="0" max="14" step="0.1" value="8.6" />
+            </label>
+          </fieldset>
+          <fieldset>
+            <legend>Settings</legend>
+            <label class="field">
+              <span>Window length N</span>
+              <select id="c-n">
+                <option>16</option>
+                <option>32</option>
+                <option selected>64</option>
+                <option>128</option>
+                <option>256</option>
+                <option>512</option>
+                <option>1024</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Frequency range</span>
+              <select id="c-range">
+                <option value="zoom" selected>Main lobe (±8 bins)</option>
+                <option value="full">Full (±N/2)</option>
+              </select>
+            </label>
+            <label class="check"><input id="c-sym" type="checkbox" /> Symmetric definition (filter design)</label>
+          </fieldset>
+        </form>
+
+        <div class="stage">
+          <div class="row">
+            <article class="card">
+              <header class="card-head">
+                <h2>Normalised magnitude response</h2>
+                <p>|W(ν)| / |W(0)| in dB against frequency in DFT bins</p>
+              </header>
+              <div class="plot" id="p-resp"></div>
+            </article>
+            <article class="card">
+              <header class="card-head">
+                <h2>Window shapes</h2>
+                <p>w[n], n = 0 … N−1</p>
+              </header>
+              <div class="plot" id="p-shape"></div>
+            </article>
+          </div>
+          <article class="card">
+            <header class="card-head">
+              <h2>Measured figures of merit</h2>
+              <p id="c-note"></p>
+            </header>
+            <div class="table-wrap">
+              <table id="c-table"></table>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

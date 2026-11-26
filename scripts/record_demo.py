@@ -377,10 +377,8 @@ def storyboard(d: Demo, facts: dict) -> None:
     phones[0].locator("html").evaluate("el => el.ownerDocument.defaultView.scrollTo({ top: 0, behavior: 'smooth' })")
     d.wait(2600)
 
-    # --- Closing cards
+    # --- Closing card
     d.say(None)
-    d.card(VERIFIED.format(**facts))
-    d.wait(8000)
     d.card(STATUS.format(**facts))
     d.wait(10000)
 
@@ -389,17 +387,7 @@ TITLE = """<div class="eyebrow">EE4999 Signal Processing Project · Mid-Term Dem
 <h1>SP09 · Windowing Effects and Spectral Leakage Analyzer</h1>
 <p>Compare common windows on finite sinusoids and measure main-lobe width and side-lobe levels</p>
 <div class="rule"></div>
-<p>{author}</p>
-<p style="opacity:.75">Silent demo · the captions below describe each step</p>"""
-
-VERIFIED = """<div class="eyebrow">Verification</div>
-<h1>The numbers in this demo are checked</h1>
-<div class="rule"></div>
-<ul>
-<li>{passed} of {total} automated tests pass (signal-processing engine and user interface)</li>
-<li>Independent SciPy cross-check: widths agree to {width} bins, side lobes to {psl} dB</li>
-<li>The check also exposed inaccurate entries in the classic Harris (1978) window table</li>
-</ul>"""
+<p>{author}</p>"""
 
 STATUS = """<div class="eyebrow">Mid-term status</div>
 <div class="rule"></div>
@@ -419,11 +407,6 @@ STATUS = """<div class="eyebrow">Mid-term status</div>
 </div>"""
 
 
-def sci_html(v: float) -> str:
-    mantissa, exponent = f"{v:.1e}".split("e")
-    return f"{mantissa} × 10<sup>−{abs(int(exponent))}</sup>" if int(exponent) < 0 else f"{v:g}"
-
-
 def gather_facts() -> dict:
     """Everything the cards state is read from the repository at recording time."""
     tests = subprocess.run("npx vitest run --reporter=json", shell=True, cwd=ROOT, capture_output=True,
@@ -431,7 +414,6 @@ def gather_facts() -> dict:
     result = json.loads(tests.stdout[tests.stdout.index("{"):])
     if result["numFailedTests"]:
         sys.exit(f"{result['numFailedTests']} tests fail; fix them before recording")
-    diff = json.loads((ROOT / "report" / "data" / "validation.json").read_text(encoding="utf-8"))["maxAbsDiff"]
     author_tex = ROOT / "report" / "author.tex"  # untracked: keeps the roll number out of git
     tex = author_tex.read_text(encoding="utf-8") if author_tex.exists() else ""
 
@@ -440,13 +422,7 @@ def gather_facts() -> dict:
         return m.group(1) if m else ""
 
     name, roll = macro("StudentName"), macro("RollNo")
-    return {
-        "passed": result["numPassedTests"],
-        "total": result["numTotalTests"],
-        "width": sci_html(max(diff["bw3"], diff["bw6"])),
-        "psl": sci_html(diff["psl"]),
-        "author": f"{name} ({roll})" if roll else name,
-    }
+    return {"passed": result["numPassedTests"], "author": f"{name} ({roll})" if roll else name}
 
 
 def ass_time(t: float) -> str:
